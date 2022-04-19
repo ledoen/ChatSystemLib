@@ -1,6 +1,6 @@
-﻿namespace CommunicationLib.CommunictionServers
+﻿namespace CommunicationLib.Common
 {
-    internal static class CommunictionDataHelpers
+    public static class CommunictionDataHelpers
     {
 
         public static string AddTail(string data)
@@ -10,6 +10,10 @@
 
         public static string RemoveTail(string content)
         {
+            if (content == null)
+            {
+                return null;
+            }
             return content.Replace("<EOF>", "");
         }
     }
