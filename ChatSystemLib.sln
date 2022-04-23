@@ -9,7 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerAndClient", "ServerAn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsole", "TestConsole\TestConsole.csproj", "{A3C309AC-56EB-4989-925F-0DE4D30CEC71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommunicationLib.UnitTest", "CommunicationLib.UnitTest\CommunicationLib.UnitTest.csproj", "{E75DC577-CC86-4E85-9335-030945DF9EB0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommunicationLib.UnitTest", "CommunicationLib.UnitTest\CommunicationLib.UnitTest.csproj", "{E75DC577-CC86-4E85-9335-030945DF9EB0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestApps", "TestApps", "{378A6E2B-5A78-4158-8AE2-BD192DF5C418}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientConsole", "ClientConsole\ClientConsole.csproj", "{1310F1A0-3CAF-4184-99F6-A1C3DC077882}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,9 +37,17 @@ Global
 		{E75DC577-CC86-4E85-9335-030945DF9EB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E75DC577-CC86-4E85-9335-030945DF9EB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E75DC577-CC86-4E85-9335-030945DF9EB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1310F1A0-3CAF-4184-99F6-A1C3DC077882}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1310F1A0-3CAF-4184-99F6-A1C3DC077882}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1310F1A0-3CAF-4184-99F6-A1C3DC077882}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1310F1A0-3CAF-4184-99F6-A1C3DC077882}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A3C309AC-56EB-4989-925F-0DE4D30CEC71} = {378A6E2B-5A78-4158-8AE2-BD192DF5C418}
+		{1310F1A0-3CAF-4184-99F6-A1C3DC077882} = {378A6E2B-5A78-4158-8AE2-BD192DF5C418}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {889AFF9E-F323-417B-BFAF-B27524831D2D}

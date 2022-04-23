@@ -11,14 +11,10 @@ namespace CommunicationLib.CommunictionServers
         private readonly Dictionary<int, Socket> _clientWorkers = new();
 
         public event EventHandler<int> ClientConnected;
-        public event EventHandler<int> ClientDisconnected;
-        public event EventHandler<(int, string)> ReceivedDataFromClient;
 
-        public void SendTailedDataToClients(string data)
-        {
-            data = CommunictionDataHelpers.AddTail(data);
-            SendDataToClients(data);
-        }
+        public event EventHandler<int> ClientDisconnected;
+
+        public event EventHandler<(int, string)> ReceivedDataFromClient;
 
         public void SendDataToClients(string data)
         {
@@ -27,6 +23,7 @@ namespace CommunicationLib.CommunictionServers
                 worker.SendTo(Encoding.UTF8.GetBytes(data), worker.RemoteEndPoint);
             }
         }
+
         public void StartListening(int port)
         {
             // 【1】新建socket并绑定到本地端点
@@ -36,17 +33,29 @@ namespace CommunicationLib.CommunictionServers
                 throw new Exception("No available IP Address");
             // 【1.2】新建并绑定socket
             var listener = new Socket(localAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            listener.Bind(new IPEndPoint(localAddress, port));
-            // 【2】开始接收客户端连接
-            listener.Listen(100);
-
-            while (true)
+            try
             {
-                _acceptDone.Reset();
-                listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
-                _acceptDone.WaitOne();
+                listener.Bind(new IPEndPoint(localAddress, port));
+                // 【2】开始接收客户端连接
+                listener.Listen(100);
+
+                while (true)
+                {
+                    _acceptDone.Reset();
+                    listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
+                    _acceptDone.WaitOne();
+                }
             }
-            Console.WriteLine("will never see this");
+            catch (SocketException ex)
+            {
+                throw;
+            }
+        }
+
+        public void TailAndSendDataToClients(string data)
+        {
+            data = CommunictionDataHelpers.AddTail(data);
+            SendDataToClients(data);
         }
 
         private void AcceptCallback(IAsyncResult ar)
@@ -56,13 +65,16 @@ namespace CommunicationLib.CommunictionServers
             var listener = (Socket)ar.AsyncState;
             // 【2】获取worker socket
             var worker = listener.EndAccept(ar);
-            // 【3】获取客户端网络信息
-            var clientPoint = worker.RemoteEndPoint.ToString();
-            // 【4】将上线客户端加入到地址薄
+            // 【3】将上线客户端加入到地址薄
             AddNewClientWorker(worker);
-            // 【5】触发客户上线事件，如果上线事件由客户端主动上报，则不需要触发该事件
+            // 【4】触发客户上线事件，如果上线事件由客户端主动上报，则不需要触发该事件
             ClientConnected?.Invoke(this, worker.GetHashCode());
-            // 【6】开始接收数据
+            // 【5】开始接收数据
+            BeginReceiveData(worker);
+        }
+
+        private void BeginReceiveData(Socket worker)
+        {
             var stateObject = new StateObject { Worker = worker };
             worker.BeginReceive(stateObject.Buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceivedCallback), stateObject);
         }
@@ -73,15 +85,22 @@ namespace CommunicationLib.CommunictionServers
             var stateObject = (StateObject)ar.AsyncState;
             // 【2】获取worker
             var worker = stateObject.Worker;
-            // 【3】获取接收字节数
-            var receivedBytes = worker.EndReceive(ar);
-
-            if (receivedBytes > 0)
+            try
             {
-                HandleReceiveBytes(stateObject, receivedBytes);
+                // 【3】获取接收字节数
+                var receivedBytes = worker.EndReceive(ar);
+
+                if (receivedBytes > 0)
+                {
+                    HandleReceiveBytes(stateObject, receivedBytes);
+                }
+                else
+                    HandleDisconnectClientWorker(worker);
             }
-            else
+            catch (Exception)
+            {
                 HandleDisconnectClientWorker(worker);
+            }
         }
 
         private void HandleReceiveBytes(StateObject? stateObject, int receivedBytes)
@@ -120,14 +139,17 @@ namespace CommunicationLib.CommunictionServers
         }
 
         #region client work socket list manage
+
         private void AddNewClientWorker(Socket worker)
         {
             _clientWorkers.Add(worker.GetHashCode(), worker);
         }
+
         private void RemoveClientWorker(Socket worker)
         {
             _clientWorkers.Remove(worker.GetHashCode());
         }
-        #endregion
+
+        #endregion client work socket list manage
     }
 }
